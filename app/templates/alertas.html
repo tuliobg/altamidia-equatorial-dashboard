@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Alertas{% endblock %}
+{% block content %}
+<h1>Alertas e Prioridades</h1>
+<table>
+  <thead>
+    <tr><th>Prioridade</th><th>Unidade</th><th>Recomendação</th><th>% Atual</th><th>% Sugerido</th><th>Δ kWh</th></tr>
+  </thead>
+  <tbody>
+    {% for a in analise %}
+    <tr>
+      <td><span class="pill {{ a.prioridade_classe }}">{{ a.prioridade }}</span></td>
+      <td>{{ a.nome }}</td>
+      <td class="justificativa">{{ a.justificativa }}</td>
+      <td>{{ "%.0f"|format(a.pct_atual * 100) }}%</td>
+      <td>{{ "%.0f"|format(a.pct_sugerido * 100) }}%</td>
+      <td>{{ "%+.0f"|format(a.delta_kwh) }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

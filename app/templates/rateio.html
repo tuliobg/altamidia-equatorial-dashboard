@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Sugestão de Rateio{% endblock %}
+{% block content %}
+<h1>Sugestão de Rateio — recalculada em {{ agora }} (dados até {{ ultimo_mes }})</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Prioridade</th><th>Unidade</th><th>% Atual</th><th>% Sugerido</th>
+      <th>Δ kWh</th><th>Consumo médio</th><th>Acúmulo</th><th>Justificativa</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for a in analise %}
+    <tr>
+      <td><span class="pill {{ a.prioridade_classe }}">{{ a.prioridade }}</span></td>
+      <td>{{ a.nome }}</td>
+      <td>{{ "%.0f"|format(a.pct_atual * 100) }}%</td>
+      <td>{{ "%.0f"|format(a.pct_sugerido * 100) }}%</td>
+      <td>{{ "%+.0f"|format(a.delta_kwh) }}</td>
+      <td>{{ "%.0f"|format(a.consumo_medio) }}</td>
+      <td>{{ "%.0f"|format(a.acumulado) }}</td>
+      <td class="justificativa">{{ a.justificativa }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

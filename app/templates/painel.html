@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Painel{% endblock %}
+{% block content %}
+<h1>Painel — Amortização do Investimento Solar</h1>
+<p style="color: var(--muted); font-size: 13px; margin-top: -10px;">
+  Última conta lançada: {{ ultimo_mes }} · {{ total_unidades }} unidades cadastradas
+</p>
+
+<div class="cards">
+  <div class="card">
+    <div class="label">Investimento total</div>
+    <div class="value">R$ {{ "%.0f"|format(investimento_total) }}</div>
+  </div>
+  <div class="card">
+    <div class="label">Economia acumulada</div>
+    <div class="value">R$ {{ "%.0f"|format(economia_acumulada) }}</div>
+  </div>
+  <div class="card">
+    <div class="label">% amortizado</div>
+    <div class="value">{{ "%.0f"|format(pct_amortizado * 100) }}%</div>
+  </div>
+  <div class="card">
+    <div class="label">Falta amortizar</div>
+    <div class="value">R$ {{ "%.0f"|format(falta_amortizar) }}</div>
+  </div>
+  <div class="card">
+    <div class="label">Economia média/mês (12m)</div>
+    <div class="value">R$ {{ "%.0f"|format(economia_media_mes) }}</div>
+  </div>
+  <div class="card">
+    <div class="label">Payback estimado</div>
+    <div class="value">{{ payback_meses }} {{ "mês" if payback_meses == 1 else "meses" }}</div>
+  </div>
+</div>
+
+<div class="chart-wrap">
+  <canvas id="chartEconomia" height="90"></canvas>
+</div>
+
+<script>
+const dados = {{ historico|tojson }};
+new Chart(document.getElementById('chartEconomia'), {
+  type: 'bar',
+  data: {
+    labels: dados.map(d => d.mes),
+    datasets: [
+      { type: 'bar', label: 'Custo sem solar (R$)', data: dados.map(d => d.custo_sem_solar), backgroundColor: '#e5e7eb', yAxisID: 'y' },
+      { type: 'bar', label: 'Pago (R$)', data: dados.map(d => d.pago), backgroundColor: '#16a34a', yAxisID: 'y' },
+      { type: 'line', label: 'Economia acumulada (R$)', data: dados.map(d => d.economia_acumulada), borderColor: '#1a1d23', backgroundColor: '#1a1d23', yAxisID: 'y1', tension: .3, pointRadius: 2 },
+    ]
+  },
+  options: {
+    responsive: true,
+    interaction: { mode: 'index', intersect: false },
+    scales: {
+      y:  { type: 'linear', position: 'left', title: { display: true, text: 'R$ / mês' } },
+      y1: { type: 'linear', position: 'right', grid: { drawOnChartArea: false }, title: { display: true, text: 'Economia acumulada (R$)' } },
+    }
+  }
+});
+</script>
+{% endblock %}

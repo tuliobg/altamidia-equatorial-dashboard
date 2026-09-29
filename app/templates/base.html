@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Equatorial Solar{% endblock %} — TBG Mídia</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  {% if user %}
+  <header>
+    <div class="brand">☀️ Equatorial Solar — TBG Mídia</div>
+    <nav>
+      <a href="/" class="{{ 'active' if active=='painel' else '' }}">Painel</a>
+      <a href="/consumo" class="{{ 'active' if active=='consumo' else '' }}">Consumo x Geração</a>
+      <a href="/rateio" class="{{ 'active' if active=='rateio' else '' }}">Sugestão de Rateio</a>
+      <a href="/alertas" class="{{ 'active' if active=='alertas' else '' }}">Alertas</a>
+    </nav>
+    <div class="user">{{ user.email }} · <a href="/logout">sair</a></div>
+  </header>
+  {% endif %}
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

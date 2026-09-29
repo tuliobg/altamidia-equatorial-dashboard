@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Consumo x Geração{% endblock %}
+{% block content %}
+<h1>Consumo x Geração — por unidade</h1>
+
+<div class="chart-wrap">
+  <canvas id="chartTotal" height="80"></canvas>
+</div>
+
+<table>
+  <thead>
+    <tr><th>Unidade</th><th>Consumo médio (kWh/mês, 12m)</th><th>% Rateio atual</th><th>kWh alocado</th></tr>
+  </thead>
+  <tbody>
+    {% for u in unidades %}
+    <tr>
+      <td>{{ u.nome }}</td>
+      <td>{{ "%.0f"|format(u.consumo_medio) }}</td>
+      <td>{{ "%.0f"|format(u.pct_atual * 100) }}%</td>
+      <td>{{ "%.0f"|format(u.kwh_alocado) }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<script>
+const meses = {{ meses|tojson }};
+const consumoTotal = {{ consumo_total|tojson }};
+new Chart(document.getElementById('chartTotal'), {
+  type: 'line',
+  data: {
+    labels: meses,
+    datasets: [{ label: 'Consumo total (kWh)', data: consumoTotal, borderColor: '#1a1d23', backgroundColor: '#1a1d23', tension: .3 }]
+  },
+  options: { responsive: true }
+});
+</script>
+{% endblock %}
