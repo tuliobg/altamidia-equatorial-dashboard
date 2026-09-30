@@ -11,6 +11,7 @@ from starlette.responses import RedirectResponse
 from app.auth import ALLOWED_EMAILS, exigir_login, oauth, usuario_logado
 from app.db import Base, engine, get_db
 from app.models import Unidade
+from app.routes import cadastro, faturas
 from app.services.consumo import calcular_consumo
 from app.services.painel import calcular_painel
 from app.services.rateio import gerar_analise
@@ -23,6 +24,8 @@ app.add_middleware(
     SessionMiddleware,
     secret_key=os.environ.get("SESSION_SECRET", "dev-secret-troque-em-producao"),
 )
+app.include_router(cadastro.router)
+app.include_router(faturas.router)
 
 templates = Jinja2Templates(directory="app/templates")
 
@@ -44,7 +47,8 @@ def _com_classe(analise):
 
 @app.get("/login")
 def login_page(request: Request):
-    return templates.TemplateResponse(request, "login.html", {})
+    dev_mode = not bool(os.environ.get("GOOGLE_CLIENT_ID"))
+    return templates.TemplateResponse(request, "login.html", {"dev_mode": dev_mode})
 
 
 @app.get("/auth/login")
@@ -63,6 +67,22 @@ async def auth_callback(request: Request):
     }
     if userinfo.get("email", "").lower() not in ALLOWED_EMAILS:
         return RedirectResponse(url="/sem-acesso")
+    return RedirectResponse(url="/")
+
+
+@app.get("/dev-login")
+def dev_login(request: Request):
+    """
+    Acesso de teste SEM Google OAuth — só funciona enquanto não houver
+    GOOGLE_CLIENT_ID configurado (ou seja, nunca em produção real, já que lá
+    as credenciais do Google estarão preenchidas). Existe só para o usuário
+    conseguir ver o dashboard rodando localmente antes de configurar o login
+    de verdade.
+    """
+    if os.environ.get("GOOGLE_CLIENT_ID"):
+        return RedirectResponse(url="/login")
+    email = list(ALLOWED_EMAILS)[0] if ALLOWED_EMAILS else "teste@local"
+    request.session["user"] = {"email": email, "nome": "Acesso de teste local"}
     return RedirectResponse(url="/")
 
 

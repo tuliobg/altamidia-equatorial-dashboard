@@ -10,6 +10,13 @@
     <h1>☀️ Equatorial Solar</h1>
     <p style="color: var(--muted); font-size: 14px;">TBG Mídia / Alta Mídia</p>
     <a class="btn" href="/auth/login">Entrar com Google</a>
+    {% if dev_mode %}
+    <p style="margin-top: 18px;">
+      <a href="/dev-login" style="font-size: 13px; color: var(--muted);">
+        Acesso de teste local (sem Google, só até configurarmos o login de verdade)
+      </a>
+    </p>
+    {% endif %}
   </div>
 </body>
 </html>

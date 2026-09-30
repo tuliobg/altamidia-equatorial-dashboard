@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Lançar Faturas{% endblock %}
+{% block content %}
+<h1>Lançar Faturas — upload de PDF</h1>
+<p style="color: var(--muted); font-size: 13px;">
+  Envie um ou mais PDFs de fatura da Equatorial. O sistema reconhece a unidade
+  automaticamente pelo código de UC dentro do PDF — não precisa indicar qual é qual.
+  Se uma unidade ainda não estiver cadastrada, cadastre o código em
+  <a href="/cadastro">Cadastro de Unidades</a> antes de enviar.
+</p>
+
+<form method="post" action="/faturas/upload" enctype="multipart/form-data"
+      style="display:flex; gap:12px; align-items:center; margin-bottom:24px;">
+  <input type="file" name="arquivos" accept="application/pdf" multiple required>
+  <button type="submit" class="btn" style="border:none; cursor:pointer;">Processar</button>
+</form>
+
+{% if resultados is not none %}
+<table>
+  <thead><tr><th>Arquivo</th><th>Status</th><th>Detalhe</th></tr></thead>
+  <tbody>
+    {% for r in resultados %}
+    <tr>
+      <td>{{ r.arquivo }}</td>
+      <td>
+        {% if r.status == "erro" %}<span class="pill critico">erro</span>
+        {% elif r.status == "criada" %}<span class="pill baixo">criada</span>
+        {% else %}<span class="pill medio">{{ r.status }}</span>{% endif %}
+      </td>
+      <td class="justificativa">{{ r.detalhe }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+{% endblock %}

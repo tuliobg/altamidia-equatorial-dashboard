@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Cadastro de Unidades{% endblock %}
+{% block content %}
+<h1>Cadastro de Unidades</h1>
+<p><a class="btn" href="/cadastro/nova">+ Nova unidade</a></p>
+
+<table>
+  <thead>
+    <tr><th>Unidade</th><th>Tipo</th><th>Status</th><th>Geradora</th><th>% Atual</th><th>% Sugerido</th><th>Códigos UC</th><th></th></tr>
+  </thead>
+  <tbody>
+    {% for u in unidades %}
+    <tr>
+      <td>{{ u.nome }}</td>
+      <td>{{ u.tipo or "—" }}</td>
+      <td>
+        {% if u.status == "Ativa" %}<span class="pill baixo">Ativa</span>
+        {% elif u.status == "Desativada" %}<span class="pill critico">Desativada</span>
+        {% else %}<span class="pill medio">{{ u.status }}</span>{% endif %}
+      </td>
+      <td>{{ "Sim" if u.geradora else "" }}</td>
+      <td>{{ "%.0f"|format(u.pct_rateio_atual * 100) }}%</td>
+      <td>{{ "%.0f"|format(u.pct_rateio_sugerido * 100) }}%</td>
+      <td style="font-size:12px; color:var(--muted);">{{ u.codigos|map(attribute='codigo')|join(', ') }}</td>
+      <td><a href="/cadastro/{{ u.id }}/editar">editar</a></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

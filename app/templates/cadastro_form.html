@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}{{ "Editar" if unidade else "Nova" }} Unidade{% endblock %}
+{% block content %}
+<h1>{{ "Editar unidade" if unidade else "Nova unidade" }}</h1>
+
+<form method="post" action="{{ '/cadastro/%d/editar'|format(unidade.id) if unidade else '/cadastro/nova' }}"
+      style="max-width: 480px; display: flex; flex-direction: column; gap: 12px;">
+
+  <label>Nome
+    <input type="text" name="nome" value="{{ unidade.nome if unidade else '' }}" required
+           style="width:100%; padding:8px; margin-top:4px;">
+  </label>
+
+  <label>Tipo
+    <select name="tipo" style="width:100%; padding:8px; margin-top:4px;">
+      <option value="U" {{ "selected" if unidade and unidade.tipo == "U" }}>Urbana</option>
+      <option value="R" {{ "selected" if unidade and unidade.tipo == "R" }}>Rural</option>
+    </select>
+  </label>
+
+  <label>Status
+    <select name="status" style="width:100%; padding:8px; margin-top:4px;">
+      {% for opcao in status_opcoes %}
+      <option value="{{ opcao }}" {{ "selected" if unidade and unidade.status == opcao }}>{{ opcao }}</option>
+      {% endfor %}
+    </select>
+  </label>
+
+  <label style="display:flex; align-items:center; gap:8px;">
+    <input type="checkbox" name="geradora" value="true" {{ "checked" if unidade and unidade.geradora }}>
+    É a unidade geradora (usina)
+  </label>
+
+  <label>% Rateio atual
+    <input type="number" step="0.01" name="pct_rateio_atual"
+           value="{{ (unidade.pct_rateio_atual * 100) if unidade else 0 }}"
+           style="width:100%; padding:8px; margin-top:4px;">
+  </label>
+
+  <label>% Rateio sugerido
+    <input type="number" step="0.01" name="pct_rateio_sugerido"
+           value="{{ (unidade.pct_rateio_sugerido * 100) if unidade else 0 }}"
+           style="width:100%; padding:8px; margin-top:4px;">
+  </label>
+
+  <label>Códigos de UC (um por linha — uma unidade pode ter mais de um ao longo do tempo)
+    <textarea name="codigos" rows="4" style="width:100%; padding:8px; margin-top:4px;">{{ codigos_texto }}</textarea>
+  </label>
+
+  <button type="submit" class="btn" style="border:none; cursor:pointer;">Salvar</button>
+</form>
+{% endblock %}
