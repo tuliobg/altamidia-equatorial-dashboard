@@ -5,7 +5,8 @@ from fastapi import APIRouter, Depends, Request
 from starlette.datastructures import UploadFile
 from sqlalchemy.orm import Session
 
-from app.auth import exigir_login, usuario_logado
+from app.auth import exigir_admin
+from app.ctx import ctx_base
 from app.db import get_db
 from app.models import Fatura, Unidade, UnidadeCodigo
 from app.services.extracao import extrair_dados_fatura, extrair_texto
@@ -30,20 +31,18 @@ def _encontrar_unidade(db: Session, codigo: str) -> Optional[Unidade]:
 
 
 @router.get("/upload")
-def form_upload(request: Request):
-    redirect = exigir_login(request)
+def form_upload(request: Request, db: Session = Depends(get_db)):
+    redirect = exigir_admin(request, db)
     if redirect:
         return redirect
-    return templates.TemplateResponse(request, "faturas_upload.html", {
-        "user": usuario_logado(request),
-        "active": "upload",
-        "resultados": None,
-    })
+    ctx = ctx_base(request, db, "upload")
+    ctx.update({"resultados": None})
+    return templates.TemplateResponse(request, "faturas_upload.html", ctx)
 
 
 @router.post("/upload")
 async def processar_upload(request: Request, db: Session = Depends(get_db)):
-    redirect = exigir_login(request)
+    redirect = exigir_admin(request, db)
     if redirect:
         return redirect
 
@@ -104,8 +103,6 @@ async def processar_upload(request: Request, db: Session = Depends(get_db)):
 
     db.commit()
 
-    return templates.TemplateResponse(request, "faturas_upload.html", {
-        "user": usuario_logado(request),
-        "active": "upload",
-        "resultados": resultados,
-    })
+    ctx = ctx_base(request, db, "upload")
+    ctx.update({"resultados": resultados})
+    return templates.TemplateResponse(request, "faturas_upload.html", ctx)

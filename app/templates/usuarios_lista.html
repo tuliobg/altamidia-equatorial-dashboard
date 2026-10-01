@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Usuários{% endblock %}
+{% block content %}
+<h1>Usuários e Permissões</h1>
+<p class="explicacao">
+  <strong>admin</strong>: acesso completo (Painel, Consumo, Rateio, Alertas, Cadastro de
+  Unidades e Lançar Fatura). <strong>leitura</strong>: só visualiza Painel, Consumo,
+  Rateio e Alertas — não edita cadastro nem lança fatura.
+</p>
+
+<div class="table-wrap">
+<table>
+  <thead><tr><th>E-mail</th><th>Nome</th><th>Papel</th><th>Status</th><th></th></tr></thead>
+  <tbody>
+    {% for u in usuarios %}
+    <tr>
+      <td>{{ u.email }}</td>
+      <td>{{ u.nome or "—" }}</td>
+      <td>
+        <form method="post" action="/usuarios/{{ u.id }}/papel" style="display:inline;">
+          <select name="papel" onchange="this.form.submit()" style="padding:4px;">
+            {% for p in papeis %}
+            <option value="{{ p }}" {{ "selected" if u.papel == p }}>{{ p }}</option>
+            {% endfor %}
+          </select>
+        </form>
+      </td>
+      <td>
+        {% if u.ativo %}<span class="pill baixo">Ativo</span>{% else %}<span class="pill critico">Inativo</span>{% endif %}
+      </td>
+      <td>
+        <form method="post" action="/usuarios/{{ u.id }}/alternar-ativo" style="display:inline;">
+          <button type="submit" class="btn" style="border:none; cursor:pointer; padding:6px 12px; font-size:13px;">
+            {{ "Desativar" if u.ativo else "Ativar" }}
+          </button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+
+<h1 style="font-size:16px; margin-top:28px;">Adicionar / editar usuário</h1>
+<form method="post" action="/usuarios/novo" style="max-width:420px; display:flex; flex-direction:column; gap:12px;">
+  <label>E-mail (conta Google)
+    <input type="email" name="email" required style="width:100%; padding:8px; margin-top:4px;">
+  </label>
+  <label>Nome (opcional)
+    <input type="text" name="nome" style="width:100%; padding:8px; margin-top:4px;">
+  </label>
+  <label>Papel
+    <select name="papel" style="width:100%; padding:8px; margin-top:4px;">
+      <option value="leitura">leitura</option>
+      <option value="admin">admin</option>
+    </select>
+  </label>
+  <button type="submit" class="btn" style="border:none; cursor:pointer;">Salvar</button>
+</form>
+{% endblock %}

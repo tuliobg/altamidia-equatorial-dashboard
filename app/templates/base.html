@@ -5,6 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}Equatorial Solar{% endblock %} — TBG Mídia</title>
   <link rel="stylesheet" href="/static/style.css">
+  <link rel="apple-touch-icon" href="/static/icon.png">
+  <link rel="icon" href="/static/icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Equatorial Solar">
+  <meta name="theme-color" content="#16a34a">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 </head>
 <body>
@@ -16,8 +22,11 @@
       <a href="/consumo" class="{{ 'active' if active=='consumo' else '' }}">Consumo x Geração</a>
       <a href="/rateio" class="{{ 'active' if active=='rateio' else '' }}">Sugestão de Rateio</a>
       <a href="/alertas" class="{{ 'active' if active=='alertas' else '' }}">Alertas</a>
+      {% if papel == "admin" %}
       <a href="/cadastro" class="{{ 'active' if active=='cadastro' else '' }}">Cadastro</a>
       <a href="/faturas/upload" class="{{ 'active' if active=='upload' else '' }}">Lançar Fatura</a>
+      <a href="/usuarios" class="{{ 'active' if active=='usuarios' else '' }}">Usuários</a>
+      {% endif %}
     </nav>
     <div class="user">{{ user.email }} · <a href="/logout">sair</a></div>
   </header>

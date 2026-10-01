@@ -2,7 +2,8 @@ from fastapi import APIRouter, Depends, Form, Request
 from sqlalchemy.orm import Session
 from starlette.responses import RedirectResponse
 
-from app.auth import exigir_login, usuario_logado
+from app.auth import exigir_admin
+from app.ctx import ctx_base
 from app.db import get_db
 from app.models import Unidade, UnidadeCodigo
 from app.templating import templates
@@ -14,50 +15,50 @@ STATUS_OPCOES = ["Ativa", "Desativada", "Fora do rateio"]
 
 @router.get("")
 def listar(request: Request, db: Session = Depends(get_db), status: str = "Todas"):
-    redirect = exigir_login(request)
+    redirect = exigir_admin(request, db)
     if redirect:
         return redirect
     query = db.query(Unidade)
     if status in STATUS_OPCOES:
         query = query.filter(Unidade.status == status)
     unidades = query.order_by(Unidade.status, Unidade.nome).all()
-    return templates.TemplateResponse(request, "cadastro_lista.html", {
-        "user": usuario_logado(request),
-        "active": "cadastro",
+    ctx = ctx_base(request, db, "cadastro")
+    ctx.update({
         "unidades": unidades,
         "status_opcoes": STATUS_OPCOES,
         "status_atual": status,
     })
+    return templates.TemplateResponse(request, "cadastro_lista.html", ctx)
 
 
 @router.get("/nova")
-def form_nova(request: Request):
-    redirect = exigir_login(request)
+def form_nova(request: Request, db: Session = Depends(get_db)):
+    redirect = exigir_admin(request, db)
     if redirect:
         return redirect
-    return templates.TemplateResponse(request, "cadastro_form.html", {
-        "user": usuario_logado(request),
-        "active": "cadastro",
+    ctx = ctx_base(request, db, "cadastro")
+    ctx.update({
         "unidade": None,
         "status_opcoes": STATUS_OPCOES,
         "codigos_texto": "",
     })
+    return templates.TemplateResponse(request, "cadastro_form.html", ctx)
 
 
 @router.get("/{unidade_id}/editar")
 def form_editar(unidade_id: int, request: Request, db: Session = Depends(get_db)):
-    redirect = exigir_login(request)
+    redirect = exigir_admin(request, db)
     if redirect:
         return redirect
     unidade = db.get(Unidade, unidade_id)
     codigos_texto = "\n".join(c.codigo for c in unidade.codigos) if unidade else ""
-    return templates.TemplateResponse(request, "cadastro_form.html", {
-        "user": usuario_logado(request),
-        "active": "cadastro",
+    ctx = ctx_base(request, db, "cadastro")
+    ctx.update({
         "unidade": unidade,
         "status_opcoes": STATUS_OPCOES,
         "codigos_texto": codigos_texto,
     })
+    return templates.TemplateResponse(request, "cadastro_form.html", ctx)
 
 
 @router.post("/nova")
@@ -72,7 +73,7 @@ def criar(
     pct_rateio_sugerido: float = Form(0.0),
     codigos: str = Form(""),
 ):
-    redirect = exigir_login(request)
+    redirect = exigir_admin(request, db)
     if redirect:
         return redirect
     u = Unidade(
@@ -101,7 +102,7 @@ def editar(
     pct_rateio_sugerido: float = Form(0.0),
     codigos: str = Form(""),
 ):
-    redirect = exigir_login(request)
+    redirect = exigir_admin(request, db)
     if redirect:
         return redirect
     u = db.get(Unidade, unidade_id)

@@ -73,3 +73,15 @@ class Config(Base):
 
     chave = Column(String, primary_key=True)
     valor = Column(String, nullable=True)
+
+
+class Usuario(Base):
+    __tablename__ = "usuarios"
+
+    id = Column(Integer, primary_key=True)
+    email = Column(String, nullable=False, unique=True, index=True)
+    nome = Column(String, nullable=True)
+    # "admin": acesso completo (cadastro, upload de fatura, gerenciar usuários)
+    # "leitura": só visualiza Painel, Consumo, Rateio e Alertas
+    papel = Column(String, nullable=False, default="leitura")
+    ativo = Column(Boolean, nullable=False, default=True)
