@@ -36,17 +36,6 @@ nav { display: flex; gap: 16px; flex: 1; }
 nav a { color: var(--muted); text-decoration: none; font-size: 14px; padding: 6px 10px; border-radius: 6px; white-space: nowrap; }
 nav a.active, nav a:hover { color: var(--text); background: var(--bg); }
 
-@media (max-width: 680px) {
-  header { flex-wrap: nowrap; padding: 10px 14px; gap: 12px; }
-  .brand { display: none; }
-  .user { display: none; }
-  nav { overflow-x: auto; -webkit-overflow-scrolling: touch; gap: 4px; }
-  main { padding: 14px; }
-  .cards { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-  .cards.two-col { grid-template-columns: 1fr; }
-  .card .value { font-size: 20px; }
-}
-
 .user { font-size: 13px; color: var(--muted); }
 .user a { color: var(--muted); }
 
@@ -103,5 +92,16 @@ tr:last-child td { border-bottom: none; }
 
 .login-box { max-width: 380px; margin: 80px auto; text-align: center; background: var(--card); padding: 32px; border-radius: 12px; border: 1px solid var(--border); }
 .btn { display: inline-block; margin-top: 16px; padding: 10px 20px; background: var(--text); color: white; text-decoration: none; border-radius: 8px; }
+
+@media (max-width: 680px) {
+  header { flex-wrap: nowrap; padding: 10px 14px; gap: 12px; }
+  .brand { display: none; }
+  .user { display: none; }
+  nav { overflow-x: auto; -webkit-overflow-scrolling: touch; gap: 4px; }
+  main { padding: 14px; }
+  .cards { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .cards.two-col { grid-template-columns: 1fr; }
+  .card .value { font-size: 20px; }
+}
 
 h1 { font-size: 20px; margin: 0 0 16px; }
