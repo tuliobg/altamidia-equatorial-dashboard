@@ -2,6 +2,7 @@
 {% block title %}{{ "Editar" if unidade else "Nova" }} Unidade{% endblock %}
 {% block content %}
 <h1>{{ "Editar unidade" if unidade else "Nova unidade" }}</h1>
+<p><a href="/cadastro">&larr; Voltar para o Cadastro</a></p>
 
 <form method="post" action="{{ '/cadastro/%d/editar'|format(unidade.id) if unidade else '/cadastro/nova' }}"
       style="max-width: 480px; display: flex; flex-direction: column; gap: 12px;">

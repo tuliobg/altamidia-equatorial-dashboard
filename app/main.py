@@ -1,9 +1,12 @@
 import os
 from datetime import datetime
 
+from dotenv import load_dotenv
+
+load_dotenv()  # precisa vir antes dos imports de app.* que leem env vars no carregamento do módulo
+
 from fastapi import Depends, FastAPI, Request
 from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from starlette.middleware.sessions import SessionMiddleware
 from starlette.responses import RedirectResponse
@@ -15,6 +18,7 @@ from app.routes import cadastro, faturas
 from app.services.consumo import calcular_consumo
 from app.services.painel import calcular_painel
 from app.services.rateio import gerar_analise
+from app.templating import templates
 
 Base.metadata.create_all(bind=engine)
 
@@ -26,8 +30,6 @@ app.add_middleware(
 )
 app.include_router(cadastro.router)
 app.include_router(faturas.router)
-
-templates = Jinja2Templates(directory="app/templates")
 
 PRIORIDADE_CLASSE = {
     "🔴 CRÍTICO": "critico",
@@ -101,15 +103,20 @@ def sem_acesso(request: Request):
 # ── Páginas ──────────────────────────────────────────────────────────────
 
 @app.get("/")
-def painel(request: Request, db: Session = Depends(get_db)):
+def painel(request: Request, db: Session = Depends(get_db), periodo: int = 12):
     redirect = exigir_login(request)
     if redirect:
         return redirect
-    dados = calcular_painel(db)
+    if periodo not in (3, 6, 12):
+        periodo = 12
+    dados = calcular_painel(db, periodo_meses=periodo)
+    analise, _ = gerar_analise(db)
+    top5_intervencao = _com_classe(analise)[:5]
     dados.update({
         "user": usuario_logado(request),
         "active": "painel",
         "total_unidades": db.query(Unidade).count(),
+        "top5_intervencao": top5_intervencao,
     })
     return templates.TemplateResponse(request, "painel.html", dados)
 

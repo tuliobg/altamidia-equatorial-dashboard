@@ -3,6 +3,31 @@
 {% block content %}
 <h1>Sugestão de Rateio — recalculada em {{ agora }} (dados até {{ ultimo_mes }})</h1>
 
+<p class="explicacao">
+  <strong>Como essa sugestão é calculada?</strong> Para cada unidade, o sistema olha o
+  consumo médio dos últimos meses e o saldo de créditos (kWh) que ela já acumulou, e
+  propõe uma cobertura-alvo:
+</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Situação da unidade</th><th>Cobertura-alvo sugerida</th><th>Por quê</th></tr></thead>
+  <tbody>
+    <tr><td>🔴 Acúmulo crítico (≥ 3x o consumo médio)</td><td>55% do consumo</td><td>Reduz a alocação pra forçar o consumo dos créditos parados</td></tr>
+    <tr><td>🟡 Acúmulo moderado (≥ 1x o consumo médio)</td><td>90% do consumo</td><td>Leve redução, deixando o próprio consumo zerar o excesso aos poucos</td></tr>
+    <tr><td>🟢 Acúmulo baixo (entre 0 e 1x)</td><td>105% do consumo</td><td>Cobertura quase total, sem gerar sobra</td></tr>
+    <tr><td>🟢 Zerado / sem crédito</td><td>120% do consumo</td><td>Cria uma pequena reserva de segurança</td></tr>
+  </tbody>
+</table>
+</div>
+<p class="explicacao" style="margin-top:8px;">
+  Depois de calcular o % de cada unidade, o sistema ajusta tudo proporcionalmente
+  para a soma fechar exatamente 100% da franquia solar (12.500 kWh/mês) — é por isso
+  que a soma de "% Sugerido" na tabela abaixo sempre bate 100%. <strong>Importante:</strong>
+  isso é só uma recomendação — mudar o rateio de verdade pode exigir solicitação formal
+  à Equatorial, então a decisão final é sempre sua.
+</p>
+
+<div class="table-wrap">
 <table>
   <thead>
     <tr>
@@ -15,14 +40,15 @@
     <tr>
       <td><span class="pill {{ a.prioridade_classe }}">{{ a.prioridade }}</span></td>
       <td>{{ a.nome }}</td>
-      <td>{{ "%.0f"|format(a.pct_atual * 100) }}%</td>
-      <td>{{ "%.0f"|format(a.pct_sugerido * 100) }}%</td>
+      <td>{{ (a.pct_atual * 100)|brnum }}%</td>
+      <td>{{ (a.pct_sugerido * 100)|brnum }}%</td>
       <td>{{ "%+.0f"|format(a.delta_kwh) }}</td>
-      <td>{{ "%.0f"|format(a.consumo_medio) }}</td>
-      <td>{{ "%.0f"|format(a.acumulado) }}</td>
+      <td>{{ a.consumo_medio|brnum }}</td>
+      <td>{{ a.acumulado|brnum }}</td>
       <td class="justificativa">{{ a.justificativa }}</td>
     </tr>
     {% endfor %}
   </tbody>
 </table>
+</div>
 {% endblock %}

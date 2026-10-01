@@ -2,6 +2,30 @@
 {% block title %}Alertas{% endblock %}
 {% block content %}
 <h1>Alertas e Prioridades</h1>
+
+<p class="explicacao">
+  <strong>O que é "Δ kWh"?</strong> É a diferença, em kWh/mês, entre o rateio sugerido e
+  o atual: <code>(% sugerido − % atual) × 12.500 kWh</code>. Positivo significa que a
+  unidade deveria <strong>receber mais</strong> geração solar; negativo, que deveria
+  <strong>receber menos</strong> (geralmente porque já tem créditos acumulados sobrando).
+</p>
+<p class="explicacao" style="margin-top:8px;">
+  <strong>Como a prioridade é definida?</strong> Pelo tamanho dessa diferença — quanto
+  maior o Δ kWh, mais a unidade está desalinhada do ideal:
+</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Prioridade</th><th>Critério</th></tr></thead>
+  <tbody>
+    <tr><td><span class="pill critico">🔴 CRÍTICO</span></td><td>|Δ kWh| ≥ 800, ou a unidade já está com acúmulo crítico e ainda assim precisaria reduzir mais</td></tr>
+    <tr><td><span class="pill alto">🟠 ALTO</span></td><td>|Δ kWh| entre 400 e 799</td></tr>
+    <tr><td><span class="pill medio">🟡 MÉDIO</span></td><td>|Δ kWh| entre 150 e 399</td></tr>
+    <tr><td><span class="pill baixo">🟢 BAIXO</span></td><td>|Δ kWh| abaixo de 150 — ajuste fino, não urgente</td></tr>
+  </tbody>
+</table>
+</div>
+
+<div class="table-wrap">
 <table>
   <thead>
     <tr><th>Prioridade</th><th>Unidade</th><th>Recomendação</th><th>% Atual</th><th>% Sugerido</th><th>Δ kWh</th></tr>
@@ -12,11 +36,12 @@
       <td><span class="pill {{ a.prioridade_classe }}">{{ a.prioridade }}</span></td>
       <td>{{ a.nome }}</td>
       <td class="justificativa">{{ a.justificativa }}</td>
-      <td>{{ "%.0f"|format(a.pct_atual * 100) }}%</td>
-      <td>{{ "%.0f"|format(a.pct_sugerido * 100) }}%</td>
+      <td>{{ (a.pct_atual * 100)|brnum }}%</td>
+      <td>{{ (a.pct_sugerido * 100)|brnum }}%</td>
       <td>{{ "%+.0f"|format(a.delta_kwh) }}</td>
     </tr>
     {% endfor %}
   </tbody>
 </table>
+</div>
 {% endblock %}

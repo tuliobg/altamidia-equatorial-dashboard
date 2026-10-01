@@ -1,28 +1,32 @@
 from fastapi import APIRouter, Depends, Form, Request
-from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from starlette.responses import RedirectResponse
 
 from app.auth import exigir_login, usuario_logado
 from app.db import get_db
 from app.models import Unidade, UnidadeCodigo
+from app.templating import templates
 
 router = APIRouter(prefix="/cadastro")
-templates = Jinja2Templates(directory="app/templates")
 
 STATUS_OPCOES = ["Ativa", "Desativada", "Fora do rateio"]
 
 
 @router.get("")
-def listar(request: Request, db: Session = Depends(get_db)):
+def listar(request: Request, db: Session = Depends(get_db), status: str = "Todas"):
     redirect = exigir_login(request)
     if redirect:
         return redirect
-    unidades = db.query(Unidade).order_by(Unidade.status, Unidade.nome).all()
+    query = db.query(Unidade)
+    if status in STATUS_OPCOES:
+        query = query.filter(Unidade.status == status)
+    unidades = query.order_by(Unidade.status, Unidade.nome).all()
     return templates.TemplateResponse(request, "cadastro_lista.html", {
         "user": usuario_logado(request),
         "active": "cadastro",
         "unidades": unidades,
+        "status_opcoes": STATUS_OPCOES,
+        "status_atual": status,
     })
 
 

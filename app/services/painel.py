@@ -8,7 +8,7 @@ from datetime import date
 from calendar import monthrange
 from sqlalchemy.orm import Session
 
-from app.models import Fatura, Investimento
+from app.models import Fatura, Investimento, Unidade
 
 
 def _add_months(d: date, months: int) -> date:
@@ -18,7 +18,7 @@ def _add_months(d: date, months: int) -> date:
     return date(y, m, 1)
 
 
-def calcular_painel(db: Session):
+def calcular_painel(db: Session, periodo_meses: int = 12):
     investimentos = db.query(Investimento).all()
     investimento_total = sum(
         i.valor for i in investimentos if "não amortizado" not in i.descricao.lower()
@@ -35,13 +35,31 @@ def calcular_painel(db: Session):
     )
     ultimo_mes = ultimo_mes_row[0] if ultimo_mes_row else date.today()
 
+    inicio_periodo = _add_months(ultimo_mes, -(periodo_meses - 1))
+    faturas_periodo = [f for f in todas_faturas if inicio_periodo <= f.ano_mes <= ultimo_mes]
+    economia_media_mes = sum(f.diferenca for f in faturas_periodo) / periodo_meses
+
+    # Payback sempre projetado com base na economia média dos últimos 12 meses
+    # (independente do filtro de período escolhido pelo usuário), pra não virar
+    # uma projeção instável baseada em só 3 meses de dado.
     inicio_12m = _add_months(ultimo_mes, -11)
     faturas_12m = [f for f in todas_faturas if inicio_12m <= f.ano_mes <= ultimo_mes]
-    economia_media_mes = sum(f.diferenca for f in faturas_12m) / 12
+    economia_media_12m = sum(f.diferenca for f in faturas_12m) / 12
 
     falta_amortizar = investimento_total - economia_acumulada
     pct_amortizado = (economia_acumulada / investimento_total) if investimento_total else 0.0
-    payback_meses = 0 if falta_amortizar <= 0 else math.ceil(falta_amortizar / economia_media_mes) if economia_media_mes > 0 else None
+    payback_meses = 0 if falta_amortizar <= 0 else math.ceil(falta_amortizar / economia_media_12m) if economia_media_12m > 0 else None
+
+    # Top 5 unidades por economia no período escolhido, e top 5 precisando de
+    # intervenção no rateio (reaproveita a mesma prioridade da aba Alertas).
+    unidades_ativas = db.query(Unidade).filter(
+        Unidade.status == "Ativa", Unidade.geradora == False  # noqa: E712
+    ).all()
+    ranking_economia = []
+    for u in unidades_ativas:
+        economia_u = sum(f.diferenca for f in u.faturas if inicio_periodo <= f.ano_mes <= ultimo_mes)
+        ranking_economia.append({"nome": u.nome, "economia": economia_u})
+    top5_economia = sorted(ranking_economia, key=lambda r: -r["economia"])[:5]
 
     # Histórico dos últimos 24 meses para o gráfico
     historico = []
@@ -71,7 +89,9 @@ def calcular_painel(db: Session):
         "pct_amortizado": pct_amortizado,
         "falta_amortizar": falta_amortizar,
         "economia_media_mes": economia_media_mes,
+        "periodo_meses": periodo_meses,
         "payback_meses": payback_meses if payback_meses is not None else "—",
         "ultimo_mes": ultimo_mes.strftime("%m/%Y"),
         "historico": historico,
+        "top5_economia": top5_economia,
     }

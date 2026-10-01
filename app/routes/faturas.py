@@ -3,16 +3,15 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, Request
 from starlette.datastructures import UploadFile
-from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
 from app.auth import exigir_login, usuario_logado
 from app.db import get_db
 from app.models import Fatura, Unidade, UnidadeCodigo
 from app.services.extracao import extrair_dados_fatura, extrair_texto
+from app.templating import templates
 
 router = APIRouter(prefix="/faturas")
-templates = Jinja2Templates(directory="app/templates")
 
 
 def _mes_ref_para_data(mes_ref: str) -> Optional[date]:

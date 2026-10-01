@@ -9,26 +9,33 @@
 <div class="cards">
   <div class="card">
     <div class="label">Investimento total</div>
-    <div class="value">R$ {{ "%.0f"|format(investimento_total) }}</div>
+    <div class="value">R$ {{ investimento_total|brnum }}</div>
   </div>
   <div class="card">
     <div class="label">Economia acumulada</div>
-    <div class="value">R$ {{ "%.0f"|format(economia_acumulada) }}</div>
+    <div class="value">R$ {{ economia_acumulada|brnum }}</div>
   </div>
   <div class="card">
     <div class="label">% amortizado</div>
-    <div class="value">{{ "%.0f"|format(pct_amortizado * 100) }}%</div>
+    <div class="value">{{ (pct_amortizado * 100)|brnum }}%</div>
   </div>
   <div class="card">
     <div class="label">Falta amortizar</div>
-    <div class="value">R$ {{ "%.0f"|format(falta_amortizar) }}</div>
+    <div class="value">R$ {{ falta_amortizar|brnum }}</div>
   </div>
   <div class="card">
-    <div class="label">Economia média/mês (12m)</div>
-    <div class="value">R$ {{ "%.0f"|format(economia_media_mes) }}</div>
+    <div class="label">
+      Economia média/mês
+      <span class="period-filter">
+        <a href="/?periodo=3" class="{{ 'active' if periodo_meses == 3 }}">3m</a>
+        <a href="/?periodo=6" class="{{ 'active' if periodo_meses == 6 }}">6m</a>
+        <a href="/?periodo=12" class="{{ 'active' if periodo_meses == 12 }}">12m</a>
+      </span>
+    </div>
+    <div class="value">R$ {{ economia_media_mes|brnum }}</div>
   </div>
   <div class="card">
-    <div class="label">Payback estimado</div>
+    <div class="label">Payback estimado (base 12m)</div>
     <div class="value">{{ payback_meses }} {{ "mês" if payback_meses == 1 else "meses" }}</div>
   </div>
 </div>
@@ -36,6 +43,34 @@
 <div class="chart-wrap">
   <canvas id="chartEconomia" height="90"></canvas>
 </div>
+
+<div class="cards two-col">
+  <div class="card">
+    <div class="label" style="margin-bottom: 10px;">🏆 Top 5 — maior economia no período</div>
+    {% for u in top5_economia %}
+    <div style="display:flex; justify-content:space-between; padding:6px 0; {{ 'border-top:1px solid var(--border);' if not loop.first }}">
+      <span>{{ loop.index }}. {{ u.nome }}</span>
+      <strong>R$ {{ u.economia|brnum }}</strong>
+    </div>
+    {% else %}
+    <p style="color:var(--muted); font-size:13px;">Sem dados no período.</p>
+    {% endfor %}
+  </div>
+  <div class="card">
+    <div class="label" style="margin-bottom: 10px;">⚠️ Top 5 — precisam de ajuste no rateio</div>
+    {% for a in top5_intervencao %}
+    <div style="display:flex; justify-content:space-between; align-items:center; padding:6px 0; {{ 'border-top:1px solid var(--border);' if not loop.first }}">
+      <span><span class="pill {{ a.prioridade_classe }}" style="margin-right:6px;">{{ a.prioridade }}</span>{{ a.nome }}</span>
+      <strong>{{ "%+.0f"|format(a.delta_kwh) }} kWh</strong>
+    </div>
+    {% else %}
+    <p style="color:var(--muted); font-size:13px;">Nenhuma unidade com alerta no momento.</p>
+    {% endfor %}
+  </div>
+</div>
+<p style="font-size:12px; color:var(--muted); margin-top:-8px;">
+  Veja o detalhe completo em <a href="/rateio">Sugestão de Rateio</a> e <a href="/alertas">Alertas</a>.
+</p>
 
 <script>
 const dados = {{ historico|tojson }};

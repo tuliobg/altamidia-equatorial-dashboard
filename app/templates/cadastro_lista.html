@@ -2,8 +2,18 @@
 {% block title %}Cadastro de Unidades{% endblock %}
 {% block content %}
 <h1>Cadastro de Unidades</h1>
-<p><a class="btn" href="/cadastro/nova">+ Nova unidade</a></p>
 
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:10px;">
+  <a class="btn" href="/cadastro/nova">+ Nova unidade</a>
+  <span class="period-filter">
+    <a href="/cadastro?status=Todas" class="{{ 'active' if status_atual == 'Todas' }}">Todas</a>
+    {% for opcao in status_opcoes %}
+    <a href="/cadastro?status={{ opcao }}" class="{{ 'active' if status_atual == opcao }}">{{ opcao }}</a>
+    {% endfor %}
+  </span>
+</div>
+
+<div class="table-wrap">
 <table>
   <thead>
     <tr><th>Unidade</th><th>Tipo</th><th>Status</th><th>Geradora</th><th>% Atual</th><th>% Sugerido</th><th>Códigos UC</th><th></th></tr>
@@ -19,12 +29,15 @@
         {% else %}<span class="pill medio">{{ u.status }}</span>{% endif %}
       </td>
       <td>{{ "Sim" if u.geradora else "" }}</td>
-      <td>{{ "%.0f"|format(u.pct_rateio_atual * 100) }}%</td>
-      <td>{{ "%.0f"|format(u.pct_rateio_sugerido * 100) }}%</td>
+      <td>{{ (u.pct_rateio_atual * 100)|brnum }}%</td>
+      <td>{{ (u.pct_rateio_sugerido * 100)|brnum }}%</td>
       <td style="font-size:12px; color:var(--muted);">{{ u.codigos|map(attribute='codigo')|join(', ') }}</td>
       <td><a href="/cadastro/{{ u.id }}/editar">editar</a></td>
     </tr>
+    {% else %}
+    <tr><td colspan="8" style="color:var(--muted);">Nenhuma unidade com esse status.</td></tr>
     {% endfor %}
   </tbody>
 </table>
+</div>
 {% endblock %}
