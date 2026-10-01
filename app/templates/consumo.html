@@ -10,7 +10,7 @@
 <div class="table-wrap">
 <table>
   <thead>
-    <tr><th>Unidade</th><th>Consumo médio (kWh/mês, 12m)</th><th>% Rateio atual</th><th>kWh Alocado</th></tr>
+    <tr><th>Unidade</th><th>Consumo médio/mês¹</th><th>% Rateio atual</th><th>kWh Alocado</th></tr>
   </thead>
   <tbody>
     {% for u in unidades %}
@@ -24,6 +24,7 @@
   </tbody>
 </table>
 </div>
+<p style="font-size: 11px; color: var(--muted); margin-top: 4px;">¹ em kWh, média dos últimos 12 meses.</p>
 
 <p class="explicacao">
   <strong>O que é "kWh Alocado"?</strong> É a fatia da geração solar mensal (a franquia
