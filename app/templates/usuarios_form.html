@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Editar Usuário{% endblock %}
+{% block content %}
+<h1>Editar usuário</h1>
+<p><a href="/usuarios">&larr; Voltar para Usuários</a></p>
+
+<form method="post" action="/usuarios/{{ usuario_editado.id }}/editar"
+      style="max-width: 420px; display: flex; flex-direction: column; gap: 12px;">
+
+  <label>E-mail (conta Google)
+    <input type="email" name="email" value="{{ usuario_editado.email }}" required
+           style="width:100%; padding:8px; margin-top:4px;">
+  </label>
+
+  <label>Nome (opcional)
+    <input type="text" name="nome" value="{{ usuario_editado.nome or '' }}"
+           style="width:100%; padding:8px; margin-top:4px;">
+  </label>
+
+  <label>Papel
+    <select name="papel" style="width:100%; padding:8px; margin-top:4px;">
+      {% for p in papeis %}
+      <option value="{{ p }}" {{ "selected" if usuario_editado.papel == p }}>{{ p }}</option>
+      {% endfor %}
+    </select>
+  </label>
+
+  <label style="display:flex; align-items:center; gap:8px;">
+    <input type="checkbox" name="ativo" value="true" {{ "checked" if usuario_editado.ativo }}>
+    Ativo (desmarcar bloqueia o acesso desse usuário)
+  </label>
+
+  <button type="submit" class="btn" style="border:none; cursor:pointer;">Salvar</button>
+</form>
+{% endblock %}

@@ -10,7 +10,7 @@
 
 <div class="table-wrap">
 <table>
-  <thead><tr><th>E-mail</th><th>Nome</th><th>Papel</th><th>Status</th><th></th></tr></thead>
+  <thead><tr><th>E-mail</th><th>Nome</th><th>Papel</th><th>Status</th><th></th><th></th></tr></thead>
   <tbody>
     {% for u in usuarios %}
     <tr>
@@ -35,13 +35,14 @@
           </button>
         </form>
       </td>
+      <td><a href="/usuarios/{{ u.id }}/editar">editar</a></td>
     </tr>
     {% endfor %}
   </tbody>
 </table>
 </div>
 
-<h1 style="font-size:16px; margin-top:28px;">Adicionar / editar usuário</h1>
+<h1 style="font-size:16px; margin-top:28px;">Adicionar usuário</h1>
 <form method="post" action="/usuarios/novo" style="max-width:420px; display:flex; flex-direction:column; gap:12px;">
   <label>E-mail (conta Google)
     <input type="email" name="email" required style="width:100%; padding:8px; margin-top:4px;">
