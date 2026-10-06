@@ -4,7 +4,11 @@ Agente Equatorial/motor_rateio.py (planilha), portada para ler do banco
 em vez do .xlsx. Ver aquele arquivo para o racional completo de cada regra.
 """
 
+import io
 from datetime import datetime
+
+from openpyxl import Workbook
+from openpyxl.styles import Alignment, Font
 from sqlalchemy.orm import Session
 
 from app.models import Unidade, Fatura
@@ -156,3 +160,46 @@ def gerar_analise(db: Session):
     analise.sort(key=lambda a: (ordem_prioridade.get(a["prioridade"], 9), -abs(a["delta_kwh"])))
 
     return analise, ultimo_mes_global
+
+
+def exportar_xlsx(analise, ultimo_mes) -> io.BytesIO:
+    """Gera o .xlsx da Sugestão de Rateio, com as mesmas colunas da tela."""
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Sugestão de Rateio"
+
+    colunas = [
+        "Prioridade", "Unidade", "% Atual", "% Sugerido", "Δ kWh",
+        "Consumo médio (kWh/mês)", "Acúmulo (kWh)", "Justificativa",
+    ]
+    ws.append(colunas)
+    for cel in ws[1]:
+        cel.font = Font(bold=True)
+
+    for a in analise:
+        ws.append([
+            a["prioridade"],
+            a["nome"],
+            a["pct_atual"],
+            a["pct_sugerido"],
+            round(a["delta_kwh"]),
+            round(a["consumo_medio"]),
+            round(a["acumulado"]),
+            a["justificativa"],
+        ])
+
+    for row in ws.iter_rows(min_row=2, min_col=3, max_col=4):
+        for cel in row:
+            cel.number_format = "0%"
+    for row in ws.iter_rows(min_row=2, min_col=8, max_col=8):
+        for cel in row:
+            cel.alignment = Alignment(wrap_text=True, vertical="top")
+
+    larguras = [12, 24, 10, 12, 10, 20, 14, 70]
+    for i, largura in enumerate(larguras, start=1):
+        ws.column_dimensions[ws.cell(row=1, column=i).column_letter].width = largura
+
+    buffer = io.BytesIO()
+    wb.save(buffer)
+    buffer.seek(0)
+    return buffer

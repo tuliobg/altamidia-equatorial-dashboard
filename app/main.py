@@ -9,7 +9,7 @@ from fastapi import Depends, FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 from starlette.middleware.sessions import SessionMiddleware
-from starlette.responses import RedirectResponse
+from starlette.responses import RedirectResponse, StreamingResponse
 
 from app.auth import ALLOWED_EMAILS, exigir_login, oauth, usuario_logado
 from app.ctx import ctx_base
@@ -18,7 +18,7 @@ from app.models import Unidade, Usuario
 from app.routes import cadastro, faturas, usuarios
 from app.services.consumo import calcular_consumo
 from app.services.painel import calcular_painel
-from app.services.rateio import gerar_analise
+from app.services.rateio import exportar_xlsx, gerar_analise
 from app.templating import templates
 
 Base.metadata.create_all(bind=engine)
@@ -176,6 +176,21 @@ def rateio(request: Request, db: Session = Depends(get_db)):
         "agora": datetime.now().strftime("%d/%m/%Y %H:%M"),
     })
     return templates.TemplateResponse(request, "rateio.html", ctx)
+
+
+@app.get("/rateio/exportar.xlsx")
+def rateio_exportar(request: Request, db: Session = Depends(get_db)):
+    redirect = exigir_login(request, db)
+    if redirect:
+        return redirect
+    analise, ultimo_mes = gerar_analise(db)
+    buffer = exportar_xlsx(analise, ultimo_mes)
+    nome_arquivo = f"sugestao_rateio_{ultimo_mes.strftime('%Y_%m') if ultimo_mes else 'sem_dados'}.xlsx"
+    return StreamingResponse(
+        buffer,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f'attachment; filename="{nome_arquivo}"'},
+    )
 
 
 @app.get("/alertas")

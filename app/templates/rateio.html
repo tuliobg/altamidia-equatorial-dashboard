@@ -1,7 +1,10 @@
 {% extends "base.html" %}
 {% block title %}Sugestão de Rateio{% endblock %}
 {% block content %}
-<h1>Sugestão de Rateio — recalculada em {{ agora }} (dados até {{ ultimo_mes }})</h1>
+<h1 style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
+  <span>Sugestão de Rateio — recalculada em {{ agora }} (dados até {{ ultimo_mes }})</span>
+  <a href="/rateio/exportar.xlsx" class="btn" style="font-size:13px; white-space:nowrap;">⬇ Baixar em Excel</a>
+</h1>
 
 <p class="explicacao">
   <strong>Como essa sugestão é calculada?</strong> Para cada unidade, o sistema olha o

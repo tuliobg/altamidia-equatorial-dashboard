@@ -1,5 +1,6 @@
 from sqlalchemy import (
-    Boolean, Column, Date, Float, ForeignKey, Integer, String, UniqueConstraint
+    Boolean, Column, Date, DateTime, Float, ForeignKey, Integer, String,
+    UniqueConstraint, func
 )
 from sqlalchemy.orm import relationship
 
@@ -59,6 +60,19 @@ class Fatura(Base):
     unidade = relationship("Unidade", back_populates="faturas")
 
     __table_args__ = (UniqueConstraint("unidade_id", "ano_mes", name="uq_unidade_mes"),)
+
+
+class ImportacaoLog(Base):
+    __tablename__ = "importacoes_log"
+
+    id = Column(Integer, primary_key=True)
+    criado_em = Column(DateTime, nullable=False, server_default=func.now())
+    usuario_email = Column(String, nullable=True)
+    arquivo = Column(String, nullable=False)
+    unidade_nome = Column(String, nullable=True)
+    mes_ref = Column(String, nullable=True)
+    status = Column(String, nullable=False)  # "criada" / "atualizada" / "erro"
+    detalhe = Column(String, nullable=False)
 
 
 class Investimento(Base):

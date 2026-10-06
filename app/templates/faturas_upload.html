@@ -15,19 +15,22 @@
   <button type="submit" class="btn" style="border:none; cursor:pointer;">Processar</button>
 </form>
 
+{% macro pill(status) -%}
+  {% if status == "erro" %}<span class="pill critico">erro</span>
+  {% elif status == "criada" %}<span class="pill baixo">criada</span>
+  {% else %}<span class="pill medio">{{ status }}</span>{% endif %}
+{%- endmacro %}
+
 {% if resultados is not none %}
-<div class="table-wrap">
+<h1 style="font-size:16px;">Resultado deste envio</h1>
+<div class="table-wrap" style="margin-bottom:24px;">
 <table>
   <thead><tr><th>Arquivo</th><th>Status</th><th>Detalhe</th></tr></thead>
   <tbody>
     {% for r in resultados %}
     <tr>
       <td>{{ r.arquivo }}</td>
-      <td>
-        {% if r.status == "erro" %}<span class="pill critico">erro</span>
-        {% elif r.status == "criada" %}<span class="pill baixo">criada</span>
-        {% else %}<span class="pill medio">{{ r.status }}</span>{% endif %}
-      </td>
+      <td>{{ pill(r.status) }}</td>
       <td class="justificativa">{{ r.detalhe }}</td>
     </tr>
     {% endfor %}
@@ -35,4 +38,31 @@
 </table>
 </div>
 {% endif %}
+
+<h1 style="font-size:16px;">Histórico de importações</h1>
+<p class="explicacao">
+  Registro de todos os PDFs já enviados, mais recentes primeiro — útil para conferir
+  depois o que foi lançado certo e o que deu erro (código de UC não cadastrado, PDF
+  ilegível, mês não identificado etc.), inclusive de envios de sessões anteriores.
+</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Quando</th><th>Arquivo</th><th>Unidade</th><th>Mês</th><th>Status</th><th>Detalhe</th><th>Quem enviou</th></tr></thead>
+  <tbody>
+    {% for h in historico %}
+    <tr>
+      <td>{{ h.criado_em.strftime("%d/%m/%Y %H:%M") }}</td>
+      <td>{{ h.arquivo }}</td>
+      <td>{{ h.unidade_nome or "—" }}</td>
+      <td>{{ h.mes_ref or "—" }}</td>
+      <td>{{ pill(h.status) }}</td>
+      <td class="justificativa">{{ h.detalhe }}</td>
+      <td>{{ h.usuario_email or "—" }}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="7" style="color: var(--muted);">Nenhuma importação registrada ainda.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
 {% endblock %}
