@@ -10,7 +10,9 @@ import re
 import pdfplumber
 
 REGEX_SALDO = re.compile(r"Saldo Acumulado Geral Total[:\s]+([\d\.,]+)", re.IGNORECASE)
-REGEX_EXPIRAR = re.compile(r"[Ss]aldo.{0,40}[Aa] [Ee]xpirar[^\d]*([\d\.,]+)")
+REGEX_EXPIRAR = re.compile(
+    r"[Ss]aldo.{0,40}[Aa] [Ee]xpirar[^\d]*([\d\.,]+)(?:\s*na\s+ref\s+(\d{2})/(\d{2}))?"
+)
 
 
 def _num(s):
@@ -92,6 +94,11 @@ def extrair_dados_fatura(texto: str) -> dict:
     acumulado = _num(m_saldo.group(1)) if m_saldo else 0.0
     m_expirar = REGEX_EXPIRAR.search(texto)
     a_expirar = _num(m_expirar.group(1)) if m_expirar else 0.0
+    a_expirar_ref = (
+        f"{m_expirar.group(2)}/20{m_expirar.group(3)}"
+        if m_expirar and m_expirar.group(2)
+        else None
+    )
 
     consumo_kwh = float(consumo_kwh)
     tarifa_kwh_f = _num(tarifa_kwh)
@@ -109,6 +116,7 @@ def extrair_dados_fatura(texto: str) -> dict:
         "cip_tax": cip_rs_f,
         "acumulado": acumulado,
         "a_expirar": a_expirar,
+        "a_expirar_ref": a_expirar_ref,
         "real_valor": round(real_valor, 2),
         "pago": pago_rs,
         "diferenca": round(real_valor - pago_rs, 2),

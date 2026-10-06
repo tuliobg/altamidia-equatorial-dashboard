@@ -91,6 +91,7 @@ async def processar_upload(request: Request, db: Session = Depends(get_db)):
             f.acumulado = dados["acumulado"]
         if dados["a_expirar"]:
             f.a_expirar = dados["a_expirar"]
+            f.a_expirar_ref = dados["a_expirar_ref"]
         if not existente:
             db.add(f)
 

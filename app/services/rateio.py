@@ -51,7 +51,7 @@ def normalizar_percentuais(propostas: dict) -> dict:
     return {n: base[n] / 100 for n in nomes}
 
 
-def montar_justificativa(nome, consumo_medio, meses, acumulado, a_expirar,
+def montar_justificativa(nome, consumo_medio, meses, acumulado, a_expirar, a_expirar_ref,
                           pct_atual, pct_sugerido, classe):
     if consumo_medio <= 0:
         return (f"Sem histórico de consumo suficiente ({meses} mês(es) com dados). "
@@ -73,7 +73,8 @@ def montar_justificativa(nome, consumo_medio, meses, acumulado, a_expirar,
         direcao = "aumento" if delta_kwh > 0 else "redução"
         partes.append(f"Variação vs. rateio atual: {direcao} de {abs(delta_kwh):,.0f} kWh/mês.".replace(",", "."))
     if a_expirar and a_expirar > 0:
-        partes.append(f"Atenção: {a_expirar:,.0f} kWh a expirar em breve.".replace(",", "."))
+        quando = f"em {a_expirar_ref}" if a_expirar_ref else "em breve"
+        partes.append(f"Atenção: {a_expirar:,.0f} kWh a expirar {quando}.".replace(",", "."))
     return " ".join(partes)
 
 
@@ -121,6 +122,7 @@ def gerar_analise(db: Session):
         ultima = max(faturas_reais, key=lambda f: f.ano_mes) if faturas_reais else None
         acumulado = ultima.acumulado if ultima else 0.0
         a_expirar = ultima.a_expirar if ultima else 0.0
+        a_expirar_ref = ultima.a_expirar_ref if ultima else None
 
         cobertura, classe = cobertura_alvo(consumo_medio, acumulado)
         pct_bruto = u.pct_rateio_atual if cobertura is None else (consumo_medio * cobertura) / FRANQUIA_KWH
@@ -134,6 +136,7 @@ def gerar_analise(db: Session):
             "meses_com_dados": meses_com_dados,
             "acumulado": acumulado,
             "a_expirar": a_expirar,
+            "a_expirar_ref": a_expirar_ref,
             "classe_acumulo": classe,
         })
 
@@ -145,8 +148,8 @@ def gerar_analise(db: Session):
         a["prioridade"] = classificar_prioridade(a["delta_kwh"], a["classe_acumulo"])
         a["justificativa"] = montar_justificativa(
             a["nome"], a["consumo_medio"], a["meses_com_dados"],
-            a["acumulado"], a["a_expirar"], a["pct_atual"], a["pct_sugerido"],
-            a["classe_acumulo"],
+            a["acumulado"], a["a_expirar"], a["a_expirar_ref"],
+            a["pct_atual"], a["pct_sugerido"], a["classe_acumulo"],
         )
 
     ordem_prioridade = {"🔴 CRÍTICO": 0, "🟠 ALTO": 1, "🟡 MÉDIO": 2, "🟢 BAIXO": 3}

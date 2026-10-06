@@ -47,6 +47,7 @@ class Fatura(Base):
     diferenca_kw = Column(Float, default=0.0)
     acumulado = Column(Float, default=0.0)
     a_expirar = Column(Float, default=0.0)
+    a_expirar_ref = Column(String, nullable=True)  # "MM/AAAA" do mês em que esse saldo expira
 
     # real_valor = "custo sem solar" = real_consumo * kwh_tax + cip_tax
     real_valor = Column(Float, default=0.0)
